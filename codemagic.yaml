@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
     integrations:
       app_store_connect: Codemagic
-        environment:
+    environment:
       xcode: "16.2"
       ios_signing:
         distribution_type: app_store
@@ -21,6 +21,19 @@ workflows:
       - name: Generate Xcode Project
         script: |
           xcodegen generate
+      - name: Fix app icon
+        script: |
+          ICON_PATH="CipkoTest/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png"
+          if [ -f "$ICON_PATH" ]; then
+            sips -s format png -s formatOptions best \
+              --resampleHeightWidth 1024 1024 \
+              "$ICON_PATH" --out "$ICON_PATH"
+          else
+            curl -L "https://cipkotest.com/android-chrome-512x512.png" -o /tmp/icon_src.png
+            sips -s format png -s formatOptions best \
+              --resampleHeightWidth 1024 1024 \
+              /tmp/icon_src.png --out "$ICON_PATH"
+          fi
       - name: Set up code signing settings
         script: |
           xcode-project use-profiles
