@@ -37,7 +37,7 @@ workflows:
       - name: Set up code signing settings
         script: |
           xcode-project use-profiles
-      - name: Create ExportOptions.plist
+            - name: Create ExportOptions.plist
         script: |
           cat > ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -45,9 +45,16 @@ workflows:
           <plist version="1.0">
           <dict>
             <key>method</key>
-            <string>app-store</string>
+            <string>app-store-connect</string>
             <key>teamID</key>
             <string>839UK2J8H3</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.cipkotest.app</key>
+              <string>CipkoTest AppStore</string>
+            </dict>
             <key>uploadSymbols</key>
             <true/>
             <key>compileBitcode</key>
