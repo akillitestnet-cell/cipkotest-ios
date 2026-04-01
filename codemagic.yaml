@@ -8,6 +8,8 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.cipkotest.app
+        certificate: CipkoTest Distribution
+        provisioning_profile: CipkoTest AppStore
       vars:
         XCODE_PROJECT: "CipkoTest.xcodeproj"
         XCODE_SCHEME: "CipkoTest"
