@@ -10,7 +10,7 @@ workflows:
         XCODE_PROJECT: "CipkoTest.xcodeproj"
         XCODE_SCHEME: "CipkoTest"
         BUNDLE_ID: "com.cipkotest.app"
-        APP_STORE_APPLE_ID: "BURAYA_APP_ID_YAZILACAK"
+        APP_STORE_APPLE_ID: "6761487757"
     scripts:
       - name: Install XcodeGen
         script: |
