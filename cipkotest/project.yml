@@ -1,0 +1,44 @@
+name: CipkoTest
+options:
+  bundleIdPrefix: com.cipkotest
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15.0"
+settings:
+  base:
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1"
+
+targets:
+  CipkoTest:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: CipkoTest
+    resources:
+      - path: CipkoTest/Assets.xcassets
+    info:
+      path: CipkoTest/Info.plist
+      properties:
+        CFBundleDisplayName: ÇipkoTest
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UIRequiresFullScreen: true
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        NSCameraUsageDescription: Fotoğraflı soru çözmek için kameraya ihtiyaç duyulmaktadır.
+        NSPhotoLibraryUsageDescription: Fotoğraflı soru çözmek için galeri erişimine ihtiyaç duyulmaktadır.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cipkotest.app
+        INFOPLIST_FILE: CipkoTest/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_BITCODE: false
