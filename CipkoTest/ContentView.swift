@@ -33,9 +33,7 @@ struct ContentView: View {
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                    Button(action: {
-                        webViewModel.reload()
-                    }) {
+                    Button(action: { webViewModel.reload() }) {
                         Text("Tekrar Dene")
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -50,14 +48,40 @@ struct ContentView: View {
     }
 }
 
+class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var delegate: WKScriptMessageHandler?
+    init(_ delegate: WKScriptMessageHandler) { self.delegate = delegate }
+    func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
+        delegate?.userContentController(controller, didReceive: message)
+    }
+}
+
 class WebViewModel: NSObject, ObservableObject, WKNavigationDelegate {
     @Published var isLoading = true
     @Published var hasError = false
     var webView: WKWebView?
+    let purchaseManager = PurchaseManager()
 
     func setup(webView: WKWebView) {
         self.webView = webView
+        purchaseManager.webView = webView
         webView.navigationDelegate = self
+
+        webView.configuration.userContentController.add(
+            WeakScriptMessageHandler(purchaseManager), name: "cipkoIAP"
+        )
+
+        let flagScript = WKUserScript(
+            source: """
+                window.isIOSApp = true;
+                window.iosPlatform = 'cipkotest';
+                window.cipkoAppVersion = '1.0';
+            """,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false
+        )
+        webView.configuration.userContentController.addUserScript(flagScript)
+
         load()
     }
 
@@ -68,9 +92,7 @@ class WebViewModel: NSObject, ObservableObject, WKNavigationDelegate {
         webView?.load(URLRequest(url: url))
     }
 
-    func reload() {
-        load()
-    }
+    func reload() { load() }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         isLoading = false
