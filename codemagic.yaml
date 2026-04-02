@@ -21,6 +21,11 @@ workflows:
       - name: Generate Xcode Project
         script: |
           xcodegen generate
+      - name: Resolve Swift Package dependencies
+        script: |
+          xcodebuild -resolvePackageDependencies \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME"
       - name: Fix app icon
         script: |
           ICON_PATH="CipkoTest/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png"
@@ -28,7 +33,9 @@ workflows:
             sips -s format png -s formatOptions best \
               --resampleHeightWidth 1024 1024 \
               "$ICON_PATH" --out "$ICON_PATH"
+            echo "Icon fixed: $(sips -g pixelHeight -g pixelWidth -g hasAlpha "$ICON_PATH")"
           else
+            echo "Icon not found, downloading from cipkotest.com..."
             curl -L "https://cipkotest.com/android-chrome-512x512.png" -o /tmp/icon_src.png
             sips -s format png -s formatOptions best \
               --resampleHeightWidth 1024 1024 \
@@ -37,7 +44,7 @@ workflows:
       - name: Set up code signing settings
         script: |
           xcode-project use-profiles
-            - name: Create ExportOptions.plist
+      - name: Create ExportOptions.plist
         script: |
           cat > ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
