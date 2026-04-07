@@ -2,10 +2,11 @@ import Foundation
 import WebKit
 import RevenueCat
 
+@MainActor
 class PurchaseManager: NSObject, WKScriptMessageHandler {
     weak var webView: WKWebView?
 
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+    nonisolated func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "cipkoIAP",
               let body = message.body as? [String: Any],
               let action = body["action"] as? String else { return }
@@ -13,16 +14,16 @@ class PurchaseManager: NSObject, WKScriptMessageHandler {
         switch action {
         case "setUserId":
             if let userId = body["userId"] as? String {
-                Task { await self.loginUser(userId) }
+                Task { @MainActor in await self.loginUser(userId) }
             }
         case "purchase":
             if let productId = body["productId"] as? String {
-                Task { await self.purchaseProduct(productId: productId) }
+                Task { @MainActor in await self.purchaseProduct(productId: productId) }
             }
         case "restorePurchases":
-            Task { await self.restorePurchases() }
+            Task { @MainActor in await self.restorePurchases() }
         case "getProducts":
-            Task { await self.getProducts() }
+            Task { @MainActor in await self.getProducts() }
         default:
             break
         }
@@ -103,11 +104,9 @@ class PurchaseManager: NSObject, WKScriptMessageHandler {
             }
             if let data = try? JSONSerialization.data(withJSONObject: products),
                let jsonStr = String(data: data, encoding: .utf8) {
-                DispatchQueue.main.async {
-                    self.webView?.evaluateJavaScript(
-                        "window.cipkoIAPCallback && window.cipkoIAPCallback({action:'products', products:\(jsonStr)})"
-                    )
-                }
+                webView?.evaluateJavaScript(
+                    "window.cipkoIAPCallback && window.cipkoIAPCallback({action:'products', products:\(jsonStr)})"
+                )
             }
         } catch {
             sendToWeb(["action": "productsError", "message": error.localizedDescription])
@@ -117,10 +116,8 @@ class PurchaseManager: NSObject, WKScriptMessageHandler {
     private func sendToWeb(_ data: [String: String]) {
         guard let jsonData = try? JSONSerialization.data(withJSONObject: data),
               let jsonStr = String(data: jsonData, encoding: .utf8) else { return }
-        DispatchQueue.main.async {
-            self.webView?.evaluateJavaScript(
-                "window.cipkoIAPCallback && window.cipkoIAPCallback(\(jsonStr))"
-            ) { _, _ in }
-        }
+        webView?.evaluateJavaScript(
+            "window.cipkoIAPCallback && window.cipkoIAPCallback(\(jsonStr))"
+        ) { _, _ in }
     }
 }
